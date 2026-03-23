@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUFF SYSTEM</title>
+
+<style>
+body {
+    background:black;
+    color:#00ff9f;
+    font-family:monospace;
+}
+
+.container {
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+textarea, select, button {
+    width:100%;
+    margin-top:10px;
+    padding:12px;
+    background:black;
+    color:#00ff9f;
+    border:1px solid #00ff9f;
+}
+
+button:hover {
+    background:#00ff9f;
+    color:black;
+}
+
+.log {
+    margin-top:20px;
+    height:300px;
+    overflow:auto;
+    border:1px solid #00ff9f;
+    padding:10px;
+}
+
+.success { color:#00ff00; }
+.error { color:red; }
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>⚡ BUFF SYSTEM ⚡</h2>
+
+<textarea id="links" placeholder="Mỗi link 1 dòng"></textarea>
+
+<select id="level">
+<option value="10">Level 10</option>
+<option value="20">Level 20</option>
+<option value="30">Level 30</option>
+<option value="37">Level 37</option>
+</select>
+
+<button onclick="start()">START</button>
+
+<div class="log" id="log"></div>
+</div>
+
+<script>
+function log(msg, type="") {
+    let box = document.getElementById("log");
+    box.innerHTML += `<div class="${type}">${msg}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+async function start() {
+    let links = document.getElementById("links").value.trim().split("\n");
+    let level = document.getElementById("level").value;
+
+    document.getElementById("log").innerHTML = "";
+
+    log(">>> STARTING SYSTEM...");
+
+    try {
+        let res = await fetch("https://buff-server.onrender.com/buff", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({links, level})
+        });
+
+        let data = await res.json();
+
+        data.results.forEach(r => {
+            if (r.success) {
+                log(`✔ ${r.link} → ${r.msg}`, "success");
+            } else {
+                log(`✖ ${r.link} → ${r.msg}`, "error");
+            }
+        });
+
+        log(">>> DONE");
+
+    } catch (e) {
+        log("SERVER ERROR", "error");
+    }
+}
+</script>
+</body>
+</html>
